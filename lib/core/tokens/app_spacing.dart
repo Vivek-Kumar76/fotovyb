@@ -1,0 +1,16 @@
+class AppSpacing {
+  static const double space0 = 0.0; //[cite: 5]
+  static const double space1 = 4.0; //[cite: 5]
+  static const double space2 = 8.0; //[cite: 5]
+  static const double space3 = 12.0; //[cite: 5]
+  static const double space4 = 16.0; //[cite: 5]
+  static const double space5 = 20.0; //[cite: 5]
+  static const double space6 = 24.0; //[cite: 5]
+  static const double space8 = 32.0; //[cite: 5]
+  static const double space10 = 40.0; //[cite: 5]
+  static const double space11 = 44.0; //[cite: 5]
+  static const double space12 = 48.0; //[cite: 5]
+  static const double space14 = 56.0; //[cite: 5]
+  static const double space16 = 64.0; //[cite: 5]
+  static const double space20 = 80.0; //[cite: 5]
+}
