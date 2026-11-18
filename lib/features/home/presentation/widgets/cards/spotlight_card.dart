@@ -1,153 +1,47 @@
 import 'package:flutter/material.dart';
-import '../../../../core/tokens/tokens.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../../../core/tokens/tokens.dart';
+import '../../../data/models/creative_pro_model.dart';
 
-class TopRatedProfilesSection extends StatelessWidget {
-  final VoidCallback? onViewAllTap;
-  final Function(Map<String, dynamic> profile)? onConnectTap;
-  final Function(Map<String, dynamic> profile)? onProfileTap;
-  final Function(Map<String, dynamic> profile)? onFavoriteTap;
+class SpotlightCard extends StatelessWidget {
+  final CreativeProModel pro;
+  final VoidCallback? onConnect;
+  final VoidCallback? onProfile;
+  final VoidCallback? onFavorite;
 
-  const TopRatedProfilesSection({
+  const SpotlightCard({
     super.key,
-    this.onViewAllTap,
-    this.onConnectTap,
-    this.onProfileTap,
-    this.onFavoriteTap,
+    required this.pro,
+    this.onConnect,
+    this.onProfile,
+    this.onFavorite,
   });
-
-  final List<Map<String, dynamic>> profiles = const [
-    {
-      "id": "top_1",
-      "name": "Mei Lin",
-      "role": "Fashion Stylist",
-      "city": "Mumbai",
-      "rating": 4.9,
-      "badge": "Top Rated",
-      "badgeColor": Color(0xffD97706),
-      "status": "Free",
-      "cover": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600",
-      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120",
-      "tags": ["Editorial", "Runway"],
-    },
-    {
-      "id": "top_2",
-      "name": "Kofi Mensah",
-      "role": "Photographer",
-      "city": "Bangalore",
-      "rating": 4.8,
-      "badge": "Featured",
-      "badgeColor": AppColors.accentNavy,
-      "status": "Free",
-      "cover": "https://images.unsplash.com/photo-1554048612-b6a482bc67e5?w=600",
-      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120",
-      "tags": ["Portraits", "Auto"],
-    },
-    {
-      "id": "top_3",
-      "name": "Leila Mansouri",
-      "role": "Makeup Artist",
-      "city": "Delhi",
-      "rating": 4.7,
-      "badge": null,
-      "badgeColor": null,
-      "status": "Busy",
-      "cover": "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=600",
-      "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120",
-      "tags": ["Luxury", "Bridal"],
-    },
-    {
-      "id": "top_4",
-      "name": "Arjun Kapoor",
-      "role": "Videographer",
-      "city": "Hyderabad",
-      "rating": 4.9,
-      "badge": "Rising Star",
-      "badgeColor": Color(0xff7C3AED),
-      "status": "Free",
-      "cover": "https://images.unsplash.com/photo-1536240478700-b869070f9279?w=600",
-      "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120",
-      "tags": ["Reels", "Brand Film"],
-    },
-  ];
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final screenWidth = MediaQuery.of(context).size.width;
 
-    final Color textColor = isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-    final Color activeColor = isDark ? AppColors.primaryDark : AppColors.primary;
-
-    // Higher childAspectRatio = Reduced overall card height
-    final double responsiveAspectRatio = screenWidth < 360 ? 0.56 : 0.60;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── Header Row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                "Top Rated Profiles",
-                style: TextStyle(
-                  fontFamily: AppTypography.fontFamilySans,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  color: textColor,
-                  letterSpacing: -0.3,
-                ),
-              ),
-              GestureDetector(
-                onTap: onViewAllTap,
-                child: Text(
-                  "View All",
-                  style: TextStyle(
-                    fontFamily: AppTypography.fontFamilySans,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: activeColor,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.space3),
-
-          // ── 2-Column Compact Grid
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: profiles.length,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 12,
-              childAspectRatio: responsiveAspectRatio,
-            ),
-            itemBuilder: (ctx, idx) => _buildProfileCard(context, profiles[idx], isDark),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProfileCard(BuildContext context, Map<String, dynamic> p, bool isDark) {
     final Color textColor = isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
     final Color textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
     final Color textMuted = isDark ? AppColors.textMutedDark : AppColors.textMutedLight;
-    final Color activeColor = isDark ? AppColors.primaryDark : AppColors.primary;
     final Color cardBg = isDark ? AppColors.surfaceDark : Colors.white;
     final Color borderColor = isDark ? AppColors.borderDark : const Color(0xffE2E8F0);
     final Color tagBg = isDark ? AppColors.surfaceSecondaryDark : const Color(0xffF8FAFC);
 
-    final bool isFree = p['status'] == "Free";
-    final String? badge = p['badge'] as String?;
-    final Color badgeColor = (p['badgeColor'] as Color?) ?? activeColor;
-    final String coverUrl = (p['cover'] as String?) ?? "";
+    final bool isFree = pro.isAvailable;
+    final String statusText = isFree ? "Free" : "Busy";
+    
+    // Tag list fallback from subcategories or industries
+    final tags = pro.subCategories.isNotEmpty
+        ? pro.subCategories.take(2).toList()
+        : (pro.industries.isNotEmpty
+            ? pro.industries.take(2).toList()
+            : ["Creative", "Pro"]);
+
+    // Dynamic recognition badge (e.g. Spotlight / Top Rated / Featured)
+    final String badge = pro.recognition.isNotEmpty
+        ? pro.recognition.toUpperCase()
+        : (pro.isTopRated ? "TOP RATED" : "SPOTLIGHT");
 
     return Container(
       decoration: BoxDecoration(
@@ -167,16 +61,16 @@ class TopRatedProfilesSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Cover Photo
+          // ── Cover Photo & Overlay Badges
           Stack(
             children: [
               ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(17)),
                 child: AspectRatio(
                   aspectRatio: 1.15,
-                  child: coverUrl.isNotEmpty
+                  child: pro.coverImage.isNotEmpty
                       ? Image.network(
-                          coverUrl,
+                          pro.coverImage,
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => _buildPlaceholder(isDark, textMuted),
                         )
@@ -184,35 +78,34 @@ class TopRatedProfilesSection extends StatelessWidget {
                 ),
               ),
 
-              // Top Left Badge
-              if (badge != null)
-                Positioned(
-                  top: 6,
-                  left: 6,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: badgeColor,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      badge,
-                      style: const TextStyle(
-                        fontFamily: AppTypography.fontFamilySans,
-                        color: Colors.white,
-                        fontSize: 9,
-                        fontWeight: FontWeight.w700,
-                      ),
+              // Top Left Recognition Badge
+              Positioned(
+                top: 6,
+                left: 6,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: const Color(0xffD97706),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    badge,
+                    style: const TextStyle(
+                      fontFamily: AppTypography.fontFamilySans,
+                      color: Colors.white,
+                      fontSize: 8.5,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
+              ),
 
               // Top Right Favorite Button
               Positioned(
                 top: 6,
                 right: 6,
                 child: GestureDetector(
-                  onTap: () => onFavoriteTap?.call(p),
+                  onTap: onFavorite,
                   child: Container(
                     width: 26,
                     height: 26,
@@ -220,10 +113,12 @@ class TopRatedProfilesSection extends StatelessWidget {
                       color: Colors.white.withValues(alpha: 0.9),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
-                      Icons.favorite_border_rounded,
-                      size: 14,
-                      color: Colors.black87,
+                    child: Center(
+                      child: Icon(
+                        pro.isFavourite ? LucideIcons.heartHandshake : LucideIcons.heart,
+                        size: 13,
+                        color: pro.isFavourite ? const Color(0xffEF4444) : Colors.black87,
+                      ),
                     ),
                   ),
                 ),
@@ -252,7 +147,7 @@ class TopRatedProfilesSection extends StatelessWidget {
                       ),
                       const SizedBox(width: 3.5),
                       Text(
-                        p['status'] as String,
+                        statusText,
                         style: const TextStyle(
                           fontFamily: AppTypography.fontFamilySans,
                           color: Colors.white,
@@ -267,7 +162,7 @@ class TopRatedProfilesSection extends StatelessWidget {
             ],
           ),
 
-          // ── Compact Body Details & Button
+          // ── Compact Body Details & Connect Button
           Expanded(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
@@ -277,13 +172,18 @@ class TopRatedProfilesSection extends StatelessWidget {
                 children: [
                   // Avatar, Name & Role
                   GestureDetector(
-                    onTap: () => onProfileTap?.call(p),
+                    onTap: onProfile,
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         CircleAvatar(
                           radius: 12,
-                          backgroundImage: NetworkImage(p['avatar'] as String),
+                          backgroundColor: tagBg,
+                          backgroundImage: pro.avatar.isNotEmpty ? NetworkImage(pro.avatar) : null,
+                          onBackgroundImageError: pro.avatar.isNotEmpty ? (_, __) {} : null,
+                          child: pro.avatar.isEmpty
+                              ? Icon(LucideIcons.user, size: 12, color: textMuted)
+                              : null,
                         ),
                         const SizedBox(width: 6),
                         Expanded(
@@ -291,7 +191,7 @@ class TopRatedProfilesSection extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                p['name'] as String,
+                                pro.fullName.isNotEmpty ? pro.fullName : "Creative Artist",
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
@@ -302,7 +202,11 @@ class TopRatedProfilesSection extends StatelessWidget {
                                 ),
                               ),
                               Text(
-                                p['role'] as String,
+                                pro.role.isNotEmpty
+                                    ? pro.role
+                                    : (pro.subCategories.isNotEmpty
+                                        ? pro.subCategories.first
+                                        : "Professional"),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
@@ -318,14 +222,14 @@ class TopRatedProfilesSection extends StatelessWidget {
                     ),
                   ),
 
-                  // City & Star Rating
+                  // City & Rating Row
                   Row(
                     children: [
-                      const Icon(Icons.location_on_rounded, size: 11, color: Color(0xffEF4444)),
+                      const Icon(LucideIcons.mapPin, size: 11, color: Color(0xffEF4444)),
                       const SizedBox(width: 2),
                       Expanded(
                         child: Text(
-                          p['city'] as String,
+                          pro.location.isNotEmpty ? pro.location : "Remote",
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -336,10 +240,10 @@ class TopRatedProfilesSection extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const Icon(Icons.star_rounded, size: 12, color: Color(0xffF59E0B)),
-                      const SizedBox(width: 1),
+                      const Icon(LucideIcons.star, size: 11, color: Color(0xffF59E0B)),
+                      const SizedBox(width: 2),
                       Text(
-                        "${p['rating']}",
+                        pro.ratingDisplay,
                         style: TextStyle(
                           fontFamily: AppTypography.fontFamilySans,
                           fontSize: 10.5,
@@ -354,7 +258,7 @@ class TopRatedProfilesSection extends StatelessWidget {
                   Wrap(
                     spacing: 4,
                     runSpacing: 2,
-                    children: (p['tags'] as List<String>).map((tag) {
+                    children: tags.map((tag) {
                       return Container(
                         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                         decoration: BoxDecoration(
@@ -375,9 +279,9 @@ class TopRatedProfilesSection extends StatelessWidget {
                     }).toList(),
                   ),
 
-                  // Standard Button Gradient Connect Button (#2E7D6E -> #1C3A5E)
+                  // Connect Button
                   GestureDetector(
-                    onTap: () => onConnectTap?.call(p),
+                    onTap: onConnect,
                     child: Container(
                       width: double.infinity,
                       height: 28,
@@ -410,7 +314,7 @@ class TopRatedProfilesSection extends StatelessWidget {
     return Container(
       color: isDark ? AppColors.surfaceSecondaryDark : const Color(0xffF8FAFC),
       child: Center(
-        child: Icon(Icons.image_outlined, color: textMuted.withValues(alpha: 0.6), size: 28),
+        child: Icon(LucideIcons.image, color: textMuted.withValues(alpha: 0.6), size: 28),
       ),
     );
   }

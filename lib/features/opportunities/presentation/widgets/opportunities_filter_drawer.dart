@@ -1,14 +1,33 @@
 import 'package:flutter/material.dart';
 import '../../../../core/tokens/tokens.dart';
+import '../../data/models/opportunities_feed_page.dart';
 
 class OpportunitiesFilterDrawer extends StatefulWidget {
-  final VoidCallback? onApply;
-  final VoidCallback? onClearAll;
+  final String initialBudgetRange;
+  final Set<String> initialRoles;
+  final Set<String> initialIndustries;
+  final Set<String> initialLocations;
+  final String initialRating;
+  final OpportunityFacets facets;
+  final void Function({
+    required String budgetRange,
+    required Set<String> roles,
+    required Set<String> industries,
+    required Set<String> locations,
+    required String rating,
+  }) onApply;
+  final VoidCallback onClearAll;
 
   const OpportunitiesFilterDrawer({
     super.key,
-    this.onApply,
-    this.onClearAll,
+    required this.initialBudgetRange,
+    required this.initialRoles,
+    required this.initialIndustries,
+    required this.initialLocations,
+    required this.initialRating,
+    required this.facets,
+    required this.onApply,
+    required this.onClearAll,
   });
 
   @override
@@ -17,116 +36,166 @@ class OpportunitiesFilterDrawer extends StatefulWidget {
 }
 
 class _OpportunitiesFilterDrawerState extends State<OpportunitiesFilterDrawer> {
-  String _selectedBudget = "₹50k – ₹1L";
-  final Set<String> _selectedProfTypes = {};
-  final Set<String> _selectedIndustries = {"Automotive"};
-  final Set<String> _selectedLocations = {"Bangalore"};
-  String _selectedRating = "3.5+";
+  late String _selectedBudget;
+  late Set<String> _selectedProfTypes;
+  late Set<String> _selectedIndustries;
+  late Set<String> _selectedLocations;
+  late String _selectedRating;
 
-  final List<Map<String, dynamic>> _budgets = const [
-    {"label": "₹10k – ₹50k", "count": 45},
-    {"label": "₹50k – ₹1L", "count": 32},
-    {"label": "₹1L – ₹5L", "count": 28},
-    {"label": "₹5L+", "count": 15},
+  static const List<String> _budgets = [
+    "₹10k – ₹50k",
+    "₹50k – ₹1L",
+    "₹1L – ₹5L",
+    "₹5L+",
   ];
 
-  final List<Map<String, dynamic>> _profTypes = const [
-    {"label": "Photographer", "count": 320},
-    {"label": "Videographer", "count": 180},
-    {"label": "Stylist", "count": 95},
-    {"label": "Art Director", "count": 65},
-    {"label": "MUA", "count": 72},
-    {"label": "Model", "count": 140},
+  static const List<String> _profTypes = [
+    "Photographer",
+    "Videographer",
+    "Stylist",
+    "Art Director",
+    "MUA",
+    "Model",
   ];
 
-  final List<Map<String, dynamic>> _industries = const [
-    {"label": "Fashion & Beauty", "count": 145},
-    {"label": "Tech & Gadgets", "count": 78},
-    {"label": "Automotive", "count": 52},
-    {"label": "Lifestyle", "count": 98},
-    {"label": "Travel & Tourism", "count": 65},
-    {"label": "Food & Beverage", "count": 43},
+  static const List<String> _industries = [
+    "Fashion & Beauty",
+    "Tech & Gadgets",
+    "Automotive",
+    "Lifestyle",
+    "Travel & Tourism",
+    "Food & Beverage",
   ];
 
-  final List<Map<String, dynamic>> _locations = const [
-    {"label": "Mumbai", "count": 95},
-    {"label": "Delhi", "count": 78},
-    {"label": "Bangalore", "count": 102},
-    {"label": "Chennai", "count": 42},
-    {"label": "Hyderabad", "count": 55},
-    {"label": "Pune", "count": 38},
+  static const List<String> _locations = [
+    "Mumbai",
+    "Delhi",
+    "Bangalore",
+    "Chennai",
+    "Hyderabad",
+    "Pune",
   ];
 
-  final List<Map<String, dynamic>> _ratings = const [
-    {"label": "4.5+", "count": 120},
-    {"label": "4.0+", "count": 210},
-    {"label": "3.5+", "count": 280},
-    {"label": "Any Rating", "count": 450},
+  static const List<String> _ratings = [
+    "4.5+",
+    "4.0+",
+    "3.5+",
+    "Any Rating",
   ];
 
-  void _clearAll() {
+  @override
+  void initState() {
+    super.initState();
+    _selectedBudget = widget.initialBudgetRange;
+    _selectedProfTypes = Set<String>.from(widget.initialRoles);
+    _selectedIndustries = Set<String>.from(widget.initialIndustries);
+    _selectedLocations = Set<String>.from(widget.initialLocations);
+    _selectedRating = widget.initialRating;
+  }
+
+  void _handleClearAll() {
     setState(() {
-      _selectedBudget = "";
+      _selectedBudget = '';
       _selectedProfTypes.clear();
       _selectedIndustries.clear();
       _selectedLocations.clear();
-      _selectedRating = "";
+      _selectedRating = '';
     });
-    widget.onClearAll?.call();
+    widget.onClearAll();
+    Navigator.of(context).pop();
+  }
+
+  void _handleApply() {
+    widget.onApply(
+      budgetRange: _selectedBudget,
+      roles: _selectedProfTypes,
+      industries: _selectedIndustries,
+      locations: _selectedLocations,
+      rating: _selectedRating,
+    );
+    Navigator.of(context).pop();
+  }
+
+  int? _lookupFacetCount(Map<String, int> facetMap, String key) {
+    if (facetMap.isEmpty) return null;
+    if (facetMap.containsKey(key)) return facetMap[key];
+    final lowerKey = key.toLowerCase();
+    for (final entry in facetMap.entries) {
+      if (entry.key.toLowerCase() == lowerKey) return entry.value;
+    }
+    return 0;
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final topPadding = MediaQuery.of(context).padding.top;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final topPadding = MediaQuery.paddingOf(context).top;
+    final drawerWidth = screenWidth >= 600 ? screenWidth * 0.45 : screenWidth * 0.82;
     final textColor =
         isDark ? AppColors.textPrimaryDark : const Color(0xff1E293B);
+    final borderColor =
+        isDark ? AppColors.borderDark : const Color(0xffF1F5F9);
 
     return Drawer(
       backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
-      width: MediaQuery.of(context).size.width * 0.82,
+      width: drawerWidth,
       child: SafeArea(
         top: false,
         child: Column(
           children: [
-            SizedBox(height: topPadding + 14),
+            SizedBox(height: topPadding + drawerWidth * 0.045),
 
             // ── Drawer Header: "Filters" + "Clear All"
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.symmetric(horizontal: drawerWidth * 0.065),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "Filters",
-                    style: TextStyle(
-                      fontFamily: AppTypography.fontFamilySans,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: textColor,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Filters",
+                        style: TextStyle(
+                          fontFamily: AppTypography.fontFamilySans,
+                          fontSize: drawerWidth * 0.058,
+                          fontWeight: FontWeight.w800,
+                          color: textColor,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.of(context).pop(),
+                        child: Icon(
+                          Icons.close_rounded,
+                          size: drawerWidth * 0.065,
+                          color: const Color(0xff64748B),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: drawerWidth * 0.038),
                   SizedBox(
                     width: double.infinity,
-                    height: 38,
+                    height: drawerWidth * 0.12,
                     child: OutlinedButton(
-                      onPressed: _clearAll,
+                      onPressed: _handleClearAll,
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(
                           color: Color(0xff0D9488),
                           width: 1.2,
                         ),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius:
+                              BorderRadius.circular(drawerWidth * 0.065),
                         ),
                       ),
-                      child: const Text(
+                      child: Text(
                         "Clear All",
                         style: TextStyle(
                           fontFamily: AppTypography.fontFamilySans,
-                          color: Color(0xff0D9488),
-                          fontSize: 13,
+                          color: const Color(0xff0D9488),
+                          fontSize: drawerWidth * 0.042,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -136,98 +205,146 @@ class _OpportunitiesFilterDrawerState extends State<OpportunitiesFilterDrawer> {
               ),
             ),
 
-            const SizedBox(height: 14),
-            const Divider(height: 1, color: Color(0xffF1F5F9)),
+            SizedBox(height: drawerWidth * 0.045),
+            Divider(height: 1, color: borderColor),
 
             // ── Scrollable Filter Groups
             Expanded(
               child: ListView(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: EdgeInsets.symmetric(
+                  horizontal: drawerWidth * 0.052,
+                  vertical: drawerWidth * 0.032,
+                ),
                 children: [
-                  _buildSectionHeader("BUDGET RANGE"),
+                  _buildSectionHeader("BUDGET RANGE", drawerWidth),
                   ..._budgets.map(
-                    (b) => _buildFilterTile(
-                      label: b['label'] as String,
-                      count: b['count'] as int,
-                      isSelected: _selectedBudget == b['label'],
-                      onTap: () => setState(
-                        () => _selectedBudget = b['label'] as String,
-                      ),
+                    (label) => _buildFilterTile(
+                      drawerWidth: drawerWidth,
+                      label: label,
+                      count: _lookupFacetCount(widget.facets.budgetRange, label),
+                      isSelected: _selectedBudget == label,
+                      isDark: isDark,
+                      onTap: () => setState(() {
+                        _selectedBudget = _selectedBudget == label ? '' : label;
+                      }),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: drawerWidth * 0.05),
 
-                  _buildSectionHeader("PROFESSIONAL TYPE"),
+                  _buildSectionHeader("PROFESSIONAL TYPE", drawerWidth),
                   ..._profTypes.map(
-                    (p) => _buildFilterTile(
-                      label: p['label'] as String,
-                      count: p['count'] as int,
-                      isSelected: _selectedProfTypes.contains(p['label']),
+                    (label) => _buildFilterTile(
+                      drawerWidth: drawerWidth,
+                      label: label,
+                      count: _lookupFacetCount(widget.facets.roles, label),
+                      isSelected: _selectedProfTypes.contains(label),
+                      isDark: isDark,
                       onTap: () {
                         setState(() {
-                          if (_selectedProfTypes.contains(p['label'])) {
-                            _selectedProfTypes.remove(p['label']);
+                          if (_selectedProfTypes.contains(label)) {
+                            _selectedProfTypes.remove(label);
                           } else {
-                            _selectedProfTypes.add(p['label'] as String);
+                            _selectedProfTypes.add(label);
                           }
                         });
                       },
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: drawerWidth * 0.05),
 
-                  _buildSectionHeader("INDUSTRY"),
+                  _buildSectionHeader("INDUSTRY", drawerWidth),
                   ..._industries.map(
-                    (i) => _buildFilterTile(
-                      label: i['label'] as String,
-                      count: i['count'] as int,
-                      isSelected: _selectedIndustries.contains(i['label']),
+                    (label) => _buildFilterTile(
+                      drawerWidth: drawerWidth,
+                      label: label,
+                      count: _lookupFacetCount(widget.facets.categories, label),
+                      isSelected: _selectedIndustries.contains(label),
+                      isDark: isDark,
                       onTap: () {
                         setState(() {
-                          if (_selectedIndustries.contains(i['label'])) {
-                            _selectedIndustries.remove(i['label']);
+                          if (_selectedIndustries.contains(label)) {
+                            _selectedIndustries.remove(label);
                           } else {
-                            _selectedIndustries.add(i['label'] as String);
+                            _selectedIndustries.add(label);
                           }
                         });
                       },
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: drawerWidth * 0.05),
 
-                  _buildSectionHeader("LOCATION"),
+                  _buildSectionHeader("LOCATION", drawerWidth),
                   ..._locations.map(
-                    (l) => _buildFilterTile(
-                      label: l['label'] as String,
-                      count: l['count'] as int,
-                      isSelected: _selectedLocations.contains(l['label']),
+                    (label) => _buildFilterTile(
+                      drawerWidth: drawerWidth,
+                      label: label,
+                      count: _lookupFacetCount(widget.facets.locations, label),
+                      isSelected: _selectedLocations.contains(label),
+                      isDark: isDark,
                       onTap: () {
                         setState(() {
-                          if (_selectedLocations.contains(l['label'])) {
-                            _selectedLocations.remove(l['label']);
+                          if (_selectedLocations.contains(label)) {
+                            _selectedLocations.remove(label);
                           } else {
-                            _selectedLocations.add(l['label'] as String);
+                            _selectedLocations.add(label);
                           }
                         });
                       },
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: drawerWidth * 0.05),
 
-                  _buildSectionHeader("RATING"),
+                  _buildSectionHeader("RATING", drawerWidth),
                   ..._ratings.map(
-                    (r) => _buildFilterTile(
-                      label: r['label'] as String,
-                      count: r['count'] as int,
-                      isSelected: _selectedRating == r['label'],
-                      onTap: () => setState(
-                        () => _selectedRating = r['label'] as String,
-                      ),
+                    (label) => _buildFilterTile(
+                      drawerWidth: drawerWidth,
+                      label: label,
+                      count: null,
+                      isSelected: _selectedRating == label,
+                      isDark: isDark,
+                      onTap: () => setState(() {
+                        _selectedRating = _selectedRating == label ? '' : label;
+                      }),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: drawerWidth * 0.06),
                 ],
+              ),
+            ),
+
+            // ── Sticky Bottom Apply CTA
+            Container(
+              padding: EdgeInsets.fromLTRB(
+                drawerWidth * 0.065,
+                drawerWidth * 0.032,
+                drawerWidth * 0.065,
+                drawerWidth * 0.045,
+              ),
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.surfaceDark : Colors.white,
+                border: Border(top: BorderSide(color: borderColor)),
+              ),
+              child: GestureDetector(
+                onTap: _handleApply,
+                child: Container(
+                  width: double.infinity,
+                  height: drawerWidth * 0.135,
+                  decoration: BoxDecoration(
+                    gradient: AppColors.buttonGradientCreative,
+                    borderRadius: BorderRadius.circular(drawerWidth * 0.07),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    "Apply Filters",
+                    style: TextStyle(
+                      fontFamily: AppTypography.fontFamilySans,
+                      color: Colors.white,
+                      fontSize: drawerWidth * 0.044,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
@@ -236,45 +353,59 @@ class _OpportunitiesFilterDrawerState extends State<OpportunitiesFilterDrawer> {
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(String title, double drawerWidth) {
     return Padding(
-      padding: const EdgeInsets.only(top: 8, bottom: 8),
+      padding: EdgeInsets.only(
+        top: drawerWidth * 0.025,
+        bottom: drawerWidth * 0.025,
+      ),
       child: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontFamily: AppTypography.fontFamilySans,
-          fontSize: 11,
+          fontSize: drawerWidth * 0.035,
           fontWeight: FontWeight.w800,
           letterSpacing: 0.8,
-          color: Color(0xff1E293B),
+          color: const Color(0xff64748B),
         ),
       ),
     );
   }
 
   Widget _buildFilterTile({
+    required double drawerWidth,
     required String label,
-    required int count,
+    required int? count,
     required bool isSelected,
+    required bool isDark,
     required VoidCallback onTap,
   }) {
+    final activeBg = isDark
+        ? const Color(0xff0D9488).withValues(alpha: 0.18)
+        : const Color(0xffE6F4F1);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 3.5),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        margin: EdgeInsets.symmetric(vertical: drawerWidth * 0.011),
+        padding: EdgeInsets.symmetric(
+          horizontal: drawerWidth * 0.032,
+          vertical: drawerWidth * 0.026,
+        ),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xffE6F4F1) : Colors.transparent,
-          borderRadius: BorderRadius.circular(24),
+          color: isSelected ? activeBg : Colors.transparent,
+          borderRadius: BorderRadius.circular(drawerWidth * 0.075),
         ),
         child: Row(
           children: [
             Container(
-              width: 18,
-              height: 18,
+              width: drawerWidth * 0.058,
+              height: drawerWidth * 0.058,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isSelected ? const Color(0xff0D9488) : Colors.transparent,
+                color: isSelected
+                    ? const Color(0xff0D9488)
+                    : Colors.transparent,
                 border: Border.all(
                   color: isSelected
                       ? const Color(0xff0D9488)
@@ -283,41 +414,55 @@ class _OpportunitiesFilterDrawerState extends State<OpportunitiesFilterDrawer> {
                 ),
               ),
               child: isSelected
-                  ? const Icon(Icons.check, size: 12, color: Colors.white)
+                  ? Icon(
+                      Icons.check,
+                      size: drawerWidth * 0.038,
+                      color: Colors.white,
+                    )
                   : null,
             ),
-            const SizedBox(width: 10),
+            SizedBox(width: drawerWidth * 0.032),
             Expanded(
               child: Text(
                 label,
                 style: TextStyle(
                   fontFamily: AppTypography.fontFamilySans,
-                  fontSize: 12.5,
+                  fontSize: drawerWidth * 0.04,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                   color: isSelected
                       ? const Color(0xff0D9488)
-                      : const Color(0xff475569),
+                      : (isDark
+                          ? AppColors.textSecondaryDark
+                          : const Color(0xff475569)),
                 ),
               ),
             ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? const Color(0xff0D9488)
-                    : const Color(0xffF1F5F9),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                '$count',
-                style: TextStyle(
-                  fontFamily: AppTypography.fontFamilySans,
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.w700,
-                  color: isSelected ? Colors.white : const Color(0xff64748B),
+            if (count != null)
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: drawerWidth * 0.026,
+                  vertical: drawerWidth * 0.007,
+                ),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? const Color(0xff0D9488)
+                      : (isDark
+                          ? Colors.white.withValues(alpha: 0.08)
+                          : const Color(0xffF1F5F9)),
+                  borderRadius: BorderRadius.circular(drawerWidth * 0.04),
+                ),
+                child: Text(
+                  '$count',
+                  style: TextStyle(
+                    fontFamily: AppTypography.fontFamilySans,
+                    fontSize: drawerWidth * 0.034,
+                    fontWeight: FontWeight.w700,
+                    color: isSelected
+                        ? Colors.white
+                        : const Color(0xff64748B),
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),

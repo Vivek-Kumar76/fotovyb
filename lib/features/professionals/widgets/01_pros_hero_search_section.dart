@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import '../../../../core/tokens/tokens.dart';
 
 class ProsHeroSearchSection extends StatefulWidget {
+  final String selectedCity;
+  final String selectedRole;
   final ValueChanged<String>? onSearch;
   final ValueChanged<String>? onCityChanged;
   final ValueChanged<String>? onRoleChanged;
 
   const ProsHeroSearchSection({
     super.key,
+    this.selectedCity = 'All',
+    this.selectedRole = 'All',
     this.onSearch,
     this.onCityChanged,
     this.onRoleChanged,
@@ -19,10 +23,9 @@ class ProsHeroSearchSection extends StatefulWidget {
 
 class _ProsHeroSearchSectionState extends State<ProsHeroSearchSection> {
   final TextEditingController _searchController = TextEditingController();
-  String _selectedCity = "Mumbai";
-  String _selectedRole = "All Roles";
 
   final List<String> _cities = const [
+    "All",
     "Mumbai",
     "Delhi",
     "Bangalore",
@@ -32,7 +35,7 @@ class _ProsHeroSearchSectionState extends State<ProsHeroSearchSection> {
   ];
 
   final List<String> _roles = const [
-    "All Roles",
+    "All",
     "Photographer",
     "Stylist",
     "Model",
@@ -168,14 +171,16 @@ class _ProsHeroSearchSectionState extends State<ProsHeroSearchSection> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: PopupMenuButton<String>(
-                    initialValue: _selectedCity,
-                    onSelected: (val) {
-                      setState(() => _selectedCity = val);
-                      widget.onCityChanged?.call(val);
-                    },
+                    initialValue: widget.selectedCity,
+                    onSelected: (val) => widget.onCityChanged?.call(val),
                     color: Colors.white,
                     itemBuilder: (ctx) => _cities
-                        .map((c) => PopupMenuItem(value: c, child: Text(c)))
+                        .map(
+                          (c) => PopupMenuItem(
+                            value: c,
+                            child: Text(c == 'All' ? 'All Cities' : c),
+                          ),
+                        )
                         .toList(),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -184,7 +189,9 @@ class _ProsHeroSearchSectionState extends State<ProsHeroSearchSection> {
                             size: 15, color: Color(0xff64748B)),
                         const SizedBox(width: 3),
                         Text(
-                          _selectedCity,
+                          widget.selectedCity == 'All'
+                              ? 'All Cities'
+                              : widget.selectedCity,
                           style: const TextStyle(
                             fontFamily: AppTypography.fontFamilySans,
                             fontSize: 11.5,
@@ -206,14 +213,16 @@ class _ProsHeroSearchSectionState extends State<ProsHeroSearchSection> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: PopupMenuButton<String>(
-                    initialValue: _selectedRole,
-                    onSelected: (val) {
-                      setState(() => _selectedRole = val);
-                      widget.onRoleChanged?.call(val);
-                    },
+                    initialValue: widget.selectedRole,
+                    onSelected: (val) => widget.onRoleChanged?.call(val),
                     color: Colors.white,
                     itemBuilder: (ctx) => _roles
-                        .map((r) => PopupMenuItem(value: r, child: Text(r)))
+                        .map(
+                          (r) => PopupMenuItem(
+                            value: r,
+                            child: Text(r == 'All' ? 'All Roles' : r),
+                          ),
+                        )
                         .toList(),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -222,7 +231,9 @@ class _ProsHeroSearchSectionState extends State<ProsHeroSearchSection> {
                             size: 15, color: Color(0xff64748B)),
                         const SizedBox(width: 3),
                         Text(
-                          _selectedRole,
+                          widget.selectedRole == 'All'
+                              ? 'All Roles'
+                              : widget.selectedRole,
                           style: const TextStyle(
                             fontFamily: AppTypography.fontFamilySans,
                             fontSize: 11.5,

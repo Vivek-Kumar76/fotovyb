@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import '../../../../core/tokens/tokens.dart';
 
 class TopBarSection extends StatefulWidget {
+  final String selectedCity;
+  final String selectedCategory;
+  final int professionalsCount;
   final VoidCallback? onPostGigTap;
   final VoidCallback? onNotificationsTap;
   final VoidCallback? onProfileTap;
@@ -12,6 +15,9 @@ class TopBarSection extends StatefulWidget {
 
   const TopBarSection({
     super.key,
+    this.selectedCity = "All",
+    this.selectedCategory = "All",
+    this.professionalsCount = 0,
     this.onPostGigTap,
     this.onNotificationsTap,
     this.onProfileTap,
@@ -26,11 +32,10 @@ class TopBarSection extends StatefulWidget {
 }
 
 class _TopBarSectionState extends State<TopBarSection> {
-  String selectedCity = "Mumbai";
-  String selectedCategory = "All";
   final TextEditingController searchController = TextEditingController();
 
   final List<String> cities = const [
+    "All",
     "Mumbai",
     "Bangalore",
     "Delhi NCR",
@@ -67,14 +72,13 @@ class _TopBarSectionState extends State<TopBarSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ── 1. Responsive Top Navigation Bar
+        // ── 1. Top Navigation Bar
         Padding(
           padding: const EdgeInsets.fromLTRB(14, 6, 14, 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Flexible Brand Logo
               Flexible(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,12 +120,9 @@ class _TopBarSectionState extends State<TopBarSection> {
                 ),
               ),
               const SizedBox(width: 8),
-
-              // Action Buttons Row
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // "Post a GIG" Compact Pill Button
                   GestureDetector(
                     onTap: widget.onPostGigTap,
                     child: Container(
@@ -164,8 +165,6 @@ class _TopBarSectionState extends State<TopBarSection> {
                     ),
                   ),
                   const SizedBox(width: 6),
-
-                  // Notification Icon with Unread Indicator
                   GestureDetector(
                     onTap: widget.onNotificationsTap,
                     child: Stack(
@@ -201,8 +200,6 @@ class _TopBarSectionState extends State<TopBarSection> {
                     ),
                   ),
                   const SizedBox(width: 6),
-
-                  // User Avatar
                   GestureDetector(
                     onTap: widget.onProfileTap,
                     child: Container(
@@ -226,7 +223,7 @@ class _TopBarSectionState extends State<TopBarSection> {
           ),
         ),
 
-        // ── 2. Hero Dark Gradient Banner
+        // ── 2. Hero Gradient Banner
         Container(
           width: double.infinity,
           decoration: const BoxDecoration(
@@ -245,7 +242,6 @@ class _TopBarSectionState extends State<TopBarSection> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Tagline
               const Text(
                 "INDIA'S CREATIVE TALENT NETWORK",
                 style: TextStyle(
@@ -257,8 +253,6 @@ class _TopBarSectionState extends State<TopBarSection> {
                 ),
               ),
               const SizedBox(height: 5),
-
-              // Main Headline
               RichText(
                 text: TextSpan(
                   style: TextStyle(
@@ -278,8 +272,6 @@ class _TopBarSectionState extends State<TopBarSection> {
                 ),
               ),
               const SizedBox(height: 6),
-
-              // Subtitle
               Text(
                 "Fixed pricing, fast delivery — across 28 cities",
                 style: TextStyle(
@@ -290,8 +282,6 @@ class _TopBarSectionState extends State<TopBarSection> {
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Responsive Stats Grid Row (Equal Distribution)
               Row(
                 children: [
                   Expanded(child: _buildStatItem("4,800+", "GIGs")),
@@ -302,7 +292,7 @@ class _TopBarSectionState extends State<TopBarSection> {
               ),
               const SizedBox(height: 18),
 
-              // Integrated Search Box
+              // Search Bar
               Container(
                 padding: const EdgeInsets.fromLTRB(12, 4, 4, 4),
                 decoration: BoxDecoration(
@@ -370,9 +360,9 @@ class _TopBarSectionState extends State<TopBarSection> {
               ),
               const SizedBox(height: 14),
 
-              // City Browsing Header
-              Row(
-                children: const [
+              // City Header
+              const Row(
+                children: [
                   Icon(Icons.location_on_outlined, size: 13, color: Color(0xff94A3B8)),
                   SizedBox(width: 4),
                   Text(
@@ -388,7 +378,7 @@ class _TopBarSectionState extends State<TopBarSection> {
               ),
               const SizedBox(height: 8),
 
-              // City Filter Chips
+              // City Filter Chips (Controlled by widget.selectedCity)
               SizedBox(
                 height: 34,
                 child: ListView.separated(
@@ -398,13 +388,10 @@ class _TopBarSectionState extends State<TopBarSection> {
                   separatorBuilder: (_, __) => const SizedBox(width: 8),
                   itemBuilder: (ctx, idx) {
                     final city = cities[idx];
-                    final isSelected = selectedCity == city;
+                    final isSelected = widget.selectedCity == city;
 
                     return GestureDetector(
-                      onTap: () {
-                        setState(() => selectedCity = city);
-                        widget.onCityChanged?.call(city);
-                      },
+                      onTap: () => widget.onCityChanged?.call(city),
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 160),
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -438,7 +425,7 @@ class _TopBarSectionState extends State<TopBarSection> {
           ),
         ),
 
-        // ── 3. Category Filter Chips
+        // ── 3. Category Filter Chips (Controlled by widget.selectedCategory)
         const SizedBox(height: 12),
         SizedBox(
           height: 36,
@@ -450,13 +437,10 @@ class _TopBarSectionState extends State<TopBarSection> {
             separatorBuilder: (_, __) => const SizedBox(width: 8),
             itemBuilder: (ctx, idx) {
               final cat = categories[idx];
-              final isSelected = selectedCategory == cat;
+              final isSelected = widget.selectedCategory == cat;
 
               return GestureDetector(
-                onTap: () {
-                  setState(() => selectedCategory = cat);
-                  widget.onCategoryChanged?.call(cat);
-                },
+                onTap: () => widget.onCategoryChanged?.call(cat),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 160),
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
@@ -482,14 +466,16 @@ class _TopBarSectionState extends State<TopBarSection> {
           ),
         ),
 
-        // ── 4. Search Summary & Sort Trigger
+        // ── 4. Dynamic Count Summary & Sort
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "284 professionals found in $selectedCity",
+                widget.selectedCity == "All"
+                    ? "${widget.professionalsCount} professionals found"
+                    : "${widget.professionalsCount} professionals found in ${widget.selectedCity}",
                 style: TextStyle(
                   fontFamily: AppTypography.fontFamilySans,
                   fontSize: 12,
